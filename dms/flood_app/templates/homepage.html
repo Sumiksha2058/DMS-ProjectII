@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flood Predictor - Home</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        a { text-decoration: none; color: #007bff; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Flood Predictor</h1>
+    <p>This system predicts flood risks in Nepal and sends alerts to affected users.</p>
+    <ul>
+        <li><a href="{% url 'prediction_dashboard' %}">View Predictions</a></li>
+        <li><a href="{% url 'user_management' %}">Manage Users</a></li>
+        <li><a href="{% url 'predict_and_alert' %}">Trigger Predictions and Alerts</a></li>
+    </ul>
+</body>
+</html>

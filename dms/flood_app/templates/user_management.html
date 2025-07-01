@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        form { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>User Management</h1>
+    <p>Manage users who will receive flood alerts.</p>
+    <form method="post">
+        {% csrf_token %}
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br>
+        <label for="phone">Phone (without country code, e.g., 984XXXXXXX):</label><br>
+        <input type="text" id="phone" name="phone" required><br>
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br>
+        <label for="location">Location:</label><br>
+        <input type="text" id="location" name="location" required><br><br>
+        <button type="submit">Add User</button>
+    </form>
+    {% if users %}
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Location</th>
+            </tr>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.phone }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.location }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No users registered.</p>
+    {% endif %}
+    <a href="{% url 'homepage' %}">Back to Home</a>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flood Prediction Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Flood Prediction Dashboard</h1>
+    <p>View predicted flood risks for Nepal.</p>
+    {% if predictions %}
+        <table>
+            <tr>
+                <th>Location</th>
+                <th>Predicted Date</th>
+                <th>Probability</th>
+                <th>Severity</th>
+            </tr>
+            {% for prediction in predictions %}
+                <tr>
+                    <td>{{ prediction.location }}</td>
+                    <td>{{ prediction.predicted_date|date:'Y-m-d H:i' }}</td>
+                    <td>{{ prediction.probability|floatformat:2 }}</td>
+                    <td>{{ prediction.severity_level }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No predictions available. Run the prediction process to generate data.</p>
+    {% endif %}
+    <a href="{% url 'homepage' %}">Back to Home</a>
+</body>
+</html>
