@@ -19,6 +19,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-path('predict/', include('flood_app.urls')),
     path('', include('flood_app.urls')),
 ]

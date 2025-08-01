@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manage Flood Alerts</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .card:hover {
+      transform: scale(1.01);
+      transition: 0.2s ease-in-out;
+    }
+    .alert-item {
+      border-left: 5px solid #0d6efd;
+      background-color: #e9f3ff;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 0.25rem;
+    }
+    .alert-item:hover {
+      background-color: #d9e7ff;
+      transition: 0.2s ease-in-out;
+    }
+    .no-alerts {
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 1rem;
+      border-radius: 0.25rem;
+      margin-top: 1rem;
+    }
+    .badge-severity {
+      font-size: 0.9rem;
+      padding: 0.25rem 0.5rem;
+    }
+    .badge-critical { background-color: #e63946; }
+    .badge-high { background-color: #f77f00; }
+    .badge-moderate { background-color: #ffba08; color: #333; }
+    .badge-low { background-color: #52b788; }
+    @media (max-width: 768px) {
+      .alert-item {
+        padding: 0.75rem;
+      }
+      .badge-severity {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <div class="text-center mb-4" role="banner">
+      <h2 class="text-primary"><i class="bi bi-exclamation-triangle-fill me-2"></i>Flood Alert Management</h2>
+      <p class="lead">View and manage all sent flood alerts to registered users.</p>
+    </div>
+
+    {% if alerts %}
+      <div class="list-group shadow-sm" role="list" aria-label="List of flood alerts">
+        {% for alert in alerts %}
+          <div class="alert-item list-group-item mb-2 rounded" role="listitem">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ alert.user.name|default:"Unknown User" }}</strong><br />
+                <small class="text-muted">{{ alert.sent_date|date:"Y-m-d H:i" }}</small>
+              </div>
+              <span class="badge badge-severity
+                {% if alert.message|lower == 'critical' %}badge-critical
+                {% elif alert.message|lower == 'high' %}badge-high
+                {% elif alert.message|lower == 'moderate' %}badge-moderate
+                {% else %}badge-low
+                {% endif %}">
+                📩 {{ alert.message|title }}
+              </span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert no-alerts p-3 text-center rounded shadow-sm mt-4" role="alert">
+        <i class="bi bi-info-circle-fill me-2"></i> No flood alerts available.
+      </div>
+    {% endif %}
+
+    <div class="mt-4 text-center">
+      <a href="{% url 'homepage' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back to Home</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

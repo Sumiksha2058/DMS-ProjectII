@@ -1,37 +1,246 @@
+{% load custom_filters %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Flood Prediction Dashboard</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flood Prediction Dashboard</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #e3f2fd, #fce4ec);
+      color: #333;
+      padding: 20px;
+    }
+    h1 {
+      color: #004a7c;
+      margin-bottom: 0.5em;
+    }
+    .date-block {
+      font-size: 0.95em;
+      line-height: 1.2;
+    }
+    .date-part {
+      font-weight: 700;
+      color: #0077b6;
+    }
+    .day-part {
+      font-style: italic;
+      color: #555;
+    }
+    .time-part {
+      color: #888;
+      font-variant-numeric: tabular-nums;
+    }
+    .badge-critical { background-color: #e63946; }
+    .badge-high { background-color: #f77f00; }
+    .badge-moderate { background-color: #ffba08; color: #333; }
+    .badge-low { background-color: #52b788; }
+    .fade-in {
+      animation: fadeIn 0.6s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .table-container {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .debug-info {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+  </style>
 </head>
 <body>
-    <h1>Flood Prediction Dashboard</h1>
-    <p>View predicted flood risks for Nepal.</p>
+  <div class="container fade-in">
+    <h1 class="mb-3"><i class="fas fa-water"></i> Flood Prediction Dashboard</h1>
+    <p class="lead">View predicted flood risks across Nepal based on weather and severity analysis.</p>
+
+    {% comment %} <form method="get" class="row g-3 align-items-center mb-4 shadow-sm p-3 bg-white rounded" role="search">
+      {% csrf_token %}
+      <div class="col-md-5">
+        <input type="text" name="q" class="form-control" placeholder="Search location..." value="{{ query }}" />
+      </div>
+      <div class="col-md-4">
+        <select name="granularity" id="granularity" class="form-select" onchange="this.form.submit()">
+          <option value="daily" {% if granularity == "daily" %}selected{% endif %}>Daily</option>
+          <option value="monthly" {% if granularity == "monthly" %}selected{% endif %}>Monthly</option>
+          <option value="hourly" {% if granularity == "hourly" %}selected{% endif %}>Hourly</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Search</button>
+      </div>
+    </form> {% endcomment %}
+    <div class="mb-4 shadow-sm p-3 bg-white rounded">
+      <h5 class="mb-0"><i class="fas fa-list"></i> Showing All Flood Predictions</h5>
+    </div>
+
+
+
     {% if predictions %}
-        <table>
+      <div class="alert alert-info">Total Predictions: {{ predictions|length }}</div>
+      <div class="debug-info">Debug: Query = '{{ query }}', Granularity = '{{ granularity }}'</div>
+
+      <div class="table-container">
+        <table class="table table-bordered table-hover align-middle shadow-sm">
+          <thead class="table-primary">
             <tr>
-                <th>Location</th>
-                <th>Predicted Date</th>
-                <th>Probability</th>
-                <th>Severity</th>
+              <th scope="col">Location</th>
+              <th scope="col">Predicted Date</th>
+              <th scope="col" class="text-end">Probability</th>
+              <th scope="col" class="text-center">Severity</th>
             </tr>
+          </thead>
+          <tbody>
             {% for prediction in predictions %}
-                <tr>
-                    <td>{{ prediction.location }}</td>
-                    <td>{{ prediction.predicted_date|date:'Y-m-d H:i' }}</td>
-                    <td>{{ prediction.probability|floatformat:2 }}</td>
-                    <td>{{ prediction.severity_level }}</td>
-                </tr>
+              <tr>
+                <td>{{ prediction.location }}</td>
+                <td>
+                  <div class="date-block">
+                    {% if granularity == "daily" %}
+                      <div class="date-part">{{ prediction.predicted_date|date:"Y-m-d" }}</div>
+                      <div class="day-part">{{ prediction.predicted_date|date:"D" }}</div>
+                    {% elif granularity == "monthly" %}
+                      <div class="date-part">{{ prediction.predicted_date|date:"Y-m" }}</div>
+                      <div class="day-part">{{ prediction.predicted_date|date:"F" }}</div>
+                    {% elif granularity == "hourly" %}
+                      <div class="date-part">{{ prediction.predicted_date|date:"Y-m-d H:i" }}</div>
+                      <div class="day-part">{{ prediction.predicted_date|date:"D" }}</div>
+                    {% else %}
+                      <div class="date-part">{{ prediction.predicted_date|date:"Y-m-d" }}</div>
+                      <div class="day-part">{{ prediction.predicted_date|date:"D" }}</div>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="text-end">{{ prediction.probability|floatformat:2 }}%</td>
+                <td class="text-center">
+                  <span class="badge
+                    {% if prediction.severity_level == 1 %}badge-critical
+                    {% elif prediction.severity_level == 2 %}badge-high
+                    {% elif prediction.severity_level == 3 %}badge-moderate
+                    {% else %}badge-low
+                    {% endif %} px-3 py-2">
+                    {{ SEVERITY_MAP|get_item:prediction.severity_level|title }}
+                  </span>
+                </td>
+              </tr>
             {% endfor %}
+          </tbody>
         </table>
+      </div>
+
+      <canvas id="predictionChart" width="600" height="300" class="mt-5" style="max-width: 100%;">
+        <p>Severity distribution chart is not available. Please enable JavaScript to view the chart.</p>
+      </canvas>
+
+      <canvas id="confusionMatrixChart" width="600" height="300" class="mt-5" style="max-width: 100%;">
+        <p>Confusion matrix chart is not available. Please enable JavaScript to view the chart.</p>
+      </canvas>
+
+      <!-- Download Button -->
+      <div class="mt-4 text-center">
+        <a href="{% url 'download_predictions_csv' %}" class="btn btn-success">
+          <i class="fas fa-download"></i> Download All Predictions as CSV
+        </a>
+      </div>
     {% else %}
-        <p>No predictions available. Run the prediction process to generate data.</p>
+      <div class="alert alert-warning">No predictions available. Run the prediction process to generate data.</div>
     {% endif %}
-    <a href="{% url 'homepage' %}">Back to Home</a>
+
+    <a href="{% url 'homepage' %}" class="btn btn-outline-secondary mt-4"><i class="fas fa-arrow-left"></i> Back to Home</a>
+  </div>
+
+  <!-- JS dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/tablesort@5.2.1/dist/tablesort.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    new Tablesort(document.querySelector('table'));
+
+    // Severity Distribution Chart
+    const ctx = document.getElementById('predictionChart')?.getContext('2d');
+    if (ctx) {
+      const chartLabels = {{ chart_labels|safe }};
+      const chartData = {{ chart_counts|safe }};
+      const backgroundColors = {
+        'Critical': '#e63946',
+        'High': '#f77f00',
+        'Moderate': '#ffba08',
+        'Low': '#52b788'
+      };
+      const colors = chartLabels.map(label => backgroundColors[label] || '#888');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: 'Number of Predictions by Severity',
+            data: chartData,
+            backgroundColor: colors,
+            borderRadius: 6,
+            barPercentage: 0.7
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 }
+            }
+          },
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    // Confusion Matrix Chart
+    const ctx_cm = document.getElementById('confusionMatrixChart')?.getContext('2d');
+    if (ctx_cm) {
+      const confusionMatrix = {{ confusion_matrix|safe }};
+      const labels = ['Critical', 'High', 'Moderate', 'Low'];
+      const datasets = [];
+
+      confusionMatrix.forEach((row, i) => {
+        datasets.push({
+          label: `Actual ${labels[i]}`,
+          data: row,
+          backgroundColor: ['#e63946', '#f77f00', '#ffba08', '#52b788'],
+          borderRadius: 4,
+          barPercentage: 0.9
+        });
+      });
+
+      new Chart(ctx_cm, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: datasets
+        },
+        options: {
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+          },
+          responsive: true,
+          plugins: {
+            legend: { display: true },
+            title: { display: true, text: 'Confusion Matrix (80/20 Split)' }
+          }
+        }
+      });
+    }
+  </script>
 </body>
 </html>
